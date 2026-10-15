@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Busymate AI Web SDK — plain HTML example</title>
+<style>
+  :root { color-scheme: light dark; --line: #8884; }
+  body { margin: 0; font: 15px/1.5 ui-sans-serif, system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 120px; display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  @media (max-width: 760px) { main { grid-template-columns: minmax(0, 1fr); } }
+  h1 { grid-column: 1 / -1; margin: 0; font-size: 22px; }
+  fieldset { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; min-width: 0; }
+  label { display: grid; gap: 2px; font-size: 13px; }
+  input, select { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { font: inherit; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--line); cursor: pointer; }
+  #status { font-weight: 600; }
+  #log { margin: 0; padding: 10px; border: 1px solid var(--line); border-radius: 12px; height: 340px; overflow: auto; font: 12px/1.45 ui-monospace, monospace; white-space: pre-wrap; word-break: break-word; }
+  #inline { height: 560px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; grid-column: 1 / -1; }
+  #inline:empty { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Busymate AI Web SDK <span id="version"></span></h1>
+
+  <fieldset>
+    <legend>Settings</legend>
+    <label>Assistant slug <input id="assistant" value="busyproxy" autocomplete="off"></label>
+    <label>Serving origin (blank = https://&lt;assistant&gt;.busymate.ai) <input id="origin" placeholder="https://acme.busymate.ai" autocomplete="off"></label>
+    <label>Mode
+      <select id="mode"><option>launcher</option><option>panel</option><option>inline</option></select>
+    </label>
+    <div class="row">
+      <label>Locale <input id="locale" value="en" size="6"></label>
+      <label>Theme <select id="theme"><option value="">(chat default)</option><option>light</option><option>dark</option><option>system</option></select></label>
+    </div>
+    <label>Your mint endpoint (blank = guest only) <input id="mint" placeholder="https://your-app.example/api/bmai/identity" autocomplete="off"></label>
+    <div class="row"><button id="apply" type="button">Apply and mount</button><button id="unmount" type="button">Unmount</button></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Drive the chat</legend>
+    <div class="row">
+      <button data-call="open" type="button">open()</button>
+      <button data-call="close" type="button">close()</button>
+      <button data-call="toggle" type="button">toggle()</button>
+      <button id="ask" type="button">ask("What can you help me with?")</button>
+    </div>
+    <div class="row">
+      <button id="changed" type="button">identityChanged()</button>
+      <button data-call="logout" type="button">logout()</button>
+      <button id="switch" type="button">switchAccount()</button>
+    </div>
+    <p>Link status: <span id="status">—</span></p>
+    <p id="frame" style="font-size:12px;word-break:break-all"></p>
+  </fieldset>
+
+  <div id="inline"></div>
+  <pre id="log" aria-live="polite" style="grid-column: 1 / -1"></pre>
+</main>
+
+<!-- The script-tag build. Copy dist/busymate-ai-web.iife.js from the release next to your page (or serve it from your CDN). -->
+<script src="../../dist/busymate-ai-web.iife.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
