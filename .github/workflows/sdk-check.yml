@@ -1,0 +1,71 @@
+name: SDK checks
+on:
+  push:
+    branches: [main]
+    tags: ["*"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  build:
+    name: build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify pinned contract and release metadata
+        run: python scripts/verify-release.py
+      - name: Install
+        run: npm ci
+      - name: Build SDK (ESM + CJS + types + script-tag IIFE)
+        run: npm run build
+      - name: Check the built package (zero deps, SSR import, same API in every build)
+        run: npm run check:dist
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests (pinned wire against a stand-in frame)
+        run: npm test
+      - name: Pack
+        run: npm pack
+      - name: Build the React example against the packed SDK
+        working-directory: example-app/react
+        shell: bash
+        run: |
+          npm ci
+          npm install --no-save ../../busymate-ai-web-0.1.0.tgz
+          node -e "import('@busymate/ai-web').then((s) => { if (s.SDK_VERSION !== '0.1.0') process.exit(1); console.log('example resolves', s.SDK_VERSION) })"
+          npx vite build
+      - name: Syntax-check the plain example
+        run: node --check example-app/plain/app.js && node --check example-app/server.mjs
+      - if: matrix.os == 'ubuntu-latest'
+        name: Stage release files
+        run: |
+          mkdir release
+          cp busymate-ai-web-0.1.0.tgz release/
+          cp dist/busymate-ai-web.iife.js release/busymate-ai-web-0.1.0.iife.js
+          (cd release && sha256sum * > SHA256SUMS && cat SHA256SUMS)
+      - if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: busymate-ai-web-0.1.0
+          path: release/
+
+  sdk-check:
+    if: always()
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: All SDK checks passed
+        run: test "${{ needs.build.result }}" = success

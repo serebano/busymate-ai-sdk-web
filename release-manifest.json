@@ -1,0 +1,25 @@
+{
+  "sdk": "Busymate AI web",
+  "package": "@busymate/ai-web",
+  "version": "0.1.0",
+  "wire": {
+    "contract": 1,
+    "bridge": "busymate-ai-v1",
+    "channel": "embed",
+    "identity": "busymate.identity/v1"
+  },
+  "defaultOrigin": "https://<assistant>.busymate.ai",
+  "framePath": "/support/<assistant>",
+  "builds": {
+    "esm": "dist/index.js",
+    "cjs": "dist/index.cjs",
+    "iife": "dist/busymate-ai-web.iife.js",
+    "global": "BusymateAIWeb"
+  },
+  "runtimeDependencies": 0,
+  "files": {
+    "CONTRACT-v1.md": "f61eed7433d0dcbd2ab1a70585471517bbb879656a2ac5dae286f6ef6e886c9a",
+    "contract.json": "c261f1adc17a983600bd6b3ebd2bfd929d90d2f1d8bf522f23568309d78c77ae",
+    "src/wire.ts": "099e008e062adadf844dc21cb6598af0b86a444f66b46ffa609d70ffa4880bcd"
+  }
+}

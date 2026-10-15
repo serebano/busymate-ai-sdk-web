@@ -1,0 +1,90 @@
+{
+  "contract": "busymate-ai-web/1",
+  "version": 1,
+  "bridge": "busymate-ai-v1",
+  "channel": "embed",
+  "identityContract": "busymate.identity/v1",
+  "hostClass": "web-configure",
+  "frame": {
+    "path": "/support/{assistant}",
+    "query": {
+      "channel": "embed",
+      "bridge": "busymate-ai-v1",
+      "host": "the host page's location.origin",
+      "page": "the host page's location.pathname (no query, no fragment)",
+      "locale": "optional BCP 47 first-paint locale",
+      "instance": "optional; a fresh value forces a new session"
+    },
+    "fragment": {
+      "bmai_visitor": "the durable first-party visitor token",
+      "bmai_token": "optional one-time launch assertion",
+      "bmai_nonce": "the nonce bound into bmai_token"
+    },
+    "iframe": {
+      "sandbox": "allow-scripts allow-forms allow-same-origin",
+      "allow": "tools; microphone; autoplay",
+      "referrerPolicy": "strict-origin-when-cross-origin"
+    }
+  },
+  "frameToHost": {
+    "busymate.ai.v1.ready": ["visitorKind", "displayClaims"],
+    "busymate.ai.v1.close": [],
+    "busymate.ai.v1.open_url": ["url"],
+    "busymate.ai.v1.navigate": ["href"],
+    "busymate.ai.v1.auth_request": ["url"],
+    "busymate.ai.v1.identity_request": ["v", "reason", "deadlineAt"],
+    "busymate.ai.v1.resize_to": ["w", "h"],
+    "busymate.ai.v1.resize_by": ["dw", "dh"],
+    "busymate.ai.v1.resize_end": [],
+    "busymate.ai.v1.resizable_request": [],
+    "busymate.ai.v1.session_ended": ["sessionId"],
+    "busymate.identity.v1.ack": ["v", "outcome"],
+    "bmai:pip:prepare": []
+  },
+  "hostToFrame": {
+    "busymate.ai.v1.identity": ["token", "nonce", "hc"],
+    "busymate.identity.v1.revoked": ["v", "reason"],
+    "busymate.identity.v1.unavailable": ["v", "reason", "hc"],
+    "busymate.ai.v1.ask": ["requestId", "prompt", "submit"],
+    "busymate.ai.v1.theme": ["theme"],
+    "busymate.ai.v1.locale": ["locale"],
+    "busymate.ai.v1.keyboard": ["inset"],
+    "busymate.ai.v1.resizable": ["resizable", "minW", "minH", "maxW", "maxH", "side"],
+    "bmai:pip:ready": ["ok", "reason"]
+  },
+  "reasons": {
+    "ask": ["launch", "restart", "refresh", "resume", "reconnect", "retry"],
+    "revoke": ["signed_out", "switched", "expired"],
+    "unavailable": ["not_signed_in", "mint_failed", "unsupported"]
+  },
+  "linkStatus": {
+    "states": ["unlinked", "linking", "linked", "failed"],
+    "sdkReasons": [
+      "identity_requested",
+      "identity_offered",
+      "account_changed",
+      "identified",
+      "anonymous",
+      "no_provider",
+      "not_signed_in",
+      "signed_out",
+      "switched",
+      "expired",
+      "mint_failed",
+      "mint_timeout",
+      "invalid_identity",
+      "nonce_mismatch",
+      "not_verified",
+      "origin_not_allowed"
+    ],
+    "frameReasons": "open: the code after `rejected:` in busymate.identity.v1.ack (vocabulary owned by busymate-ai-src#2069)"
+  },
+  "storage": {
+    "visitor": "bm_support_visitor:{assistant} (cookie + localStorage, ~13 months, first-party)",
+    "openState": "bm_widget_open:{assistant} (sessionStorage)",
+    "panelSize": "bm_widget_size:{assistant} (localStorage)"
+  },
+  "endpoints": {
+    "embedStatus": "GET {origin}/api/embed-status?assistant={assistant}&ancestors={comma-separated origins} -> { frameable: boolean }"
+  }
+}

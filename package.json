@@ -1,0 +1,62 @@
+{
+  "name": "@busymate/ai-web",
+  "version": "0.1.0",
+  "description": "Official versioned Busymate AI SDK for the web: embed, end-user identity linking, the busymate-ai-v1 bridge and typed events",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serebano/busymate-ai-sdk-web.git"
+  },
+  "homepage": "https://github.com/serebano/busymate-ai-sdk-web#readme",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/busymate-ai-web.iife.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./iife": "./dist/busymate-ai-web.iife.js",
+    "./contract.json": "./contract.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "contract.json",
+    "CONTRACT-v1.md",
+    "CHANGELOG.md",
+    "release-manifest.json",
+    "docs"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/clean-dist.mjs && tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "verify": "python3 scripts/verify-release.py",
+    "check:dist": "node scripts/check-dist.mjs",
+    "check": "npm run verify && npm run build && npm run check:dist && npm run typecheck && npm run lint && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.11.0",
+    "globals": "17.12.0",
+    "happy-dom": "20.14.5",
+    "tsup": "8.5.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "5.0.1"
+  }
+}

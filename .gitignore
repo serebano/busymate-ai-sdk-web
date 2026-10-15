@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+out/
+*.tgz
+coverage/
+.DS_Store
+example-app/react/dist/
