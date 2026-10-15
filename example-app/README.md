@@ -23,9 +23,10 @@ Console › Integration › allowed origins. Otherwise the SDK reports
 `error: origin_not_allowed` and link status `failed · origin_not_allowed`;
 that is the preflight working, not a bug.
 
-The default assistant `busyproxy` is the platform's public guest assistant: it
-works anonymously but does not allow localhost. Pass your own test assistant
-(`?assistant=` in the React example, the Assistant field in the plain one).
+The default assistant is `demos`, Busymate AI's own demo workspace (Northwind
+Coffee). It works anonymously only on the origins it allows. Pass your own test
+assistant (`?assistant=` in the React example, the Assistant field in the plain
+one). Use a Busymate AI test workspace, never another product's assistant.
 
 ## Identified mode
 

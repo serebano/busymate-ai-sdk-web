@@ -16,7 +16,7 @@ function App() {
   const auth = useFakeAuth();
   const [events, setEvents] = useState([]);
   const { chat, linkStatus } = useBusymateChat({
-    assistant: new URLSearchParams(location.search).get("assistant") || "busyproxy",
+    assistant: new URLSearchParams(location.search).get("assistant") || "demos",
     locale: "en",
     // Signed out: null, so the chat stays a guest. Signed in: a fresh token from YOUR backend.
     getIdentity: (request) => (auth.user && mint ? mint(request) : null),
