@@ -15,6 +15,10 @@ node example-app/server.mjs                # plain: http://localhost:5180/exampl
 cd example-app/react && npm install && npm run dev   # react: http://localhost:5181/
 ```
 
+## Hosted copy
+
+The examples are published at https://serebano.github.io/busymate-ai-sdk-web/. Preconfigure the plain one with query parameters, for example `example-app/plain/?assistant=<test-workspace>&mode=launcher`.
+
 ## Allowed origins
 
 The hosted chat frames only on origins your workspace allows. Use a **test

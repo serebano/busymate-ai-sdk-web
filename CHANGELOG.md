@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The plain example reads its settings from the URL (`?assistant=&origin=&mode=&locale=&theme=&mint=`), so a farm phone can open a preconfigured link. The examples are also published at https://serebano.github.io/busymate-ai-sdk-web/ (built from `main`).
+- Farm-phone check (Android Chrome, iOS Safari; launcher open/close, keyboard with the composer visible, `ask()`, link status): **not run yet**. No Busymate AI test workspace allows the example origin (`https://serebano.github.io`), and the hosted chat refuses to frame on any other origin. It runs once a test workspace lists that origin; the results go here.
+
 ## 0.1.0
 
 First independent web distribution, `@busymate/ai-web`, speaking wire contract v1 (bridge `busymate-ai-v1`, channel `embed`, identity `busymate.identity/v1`; see `CONTRACT-v1.md` and `contract.json`).
