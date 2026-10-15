@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Docs: `docs/identity.md` lists the hosted chat's frame reason codes (`rejected:<code>` in `busymate.identity.v1.ack`), now that the hosted chat sends the ack (busymate-ai-src#2069). No wire or code change.
+
 ## 0.1.0
 
 First independent web distribution, `@busymate/ai-web`, speaking wire contract v1 (bridge `busymate-ai-v1`, channel `embed`, identity `busymate.identity/v1`; see `CONTRACT-v1.md` and `contract.json`).

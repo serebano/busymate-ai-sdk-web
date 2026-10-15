@@ -67,6 +67,36 @@ Every step is reported as a [link status](events.md#link-status) with a stable `
 | `failed · mint_timeout` | Your provider never settled (15 s). |
 | `failed · not_verified` | The token reached the chat but the hosted verifier refused it: wrong `iss`/`aud`/workspace claim, unknown `kid`, an expired token or clock skew. Open the conversation in the Console: its account-linking timeline names the reason. |
 | `failed · origin_not_allowed` | Add this page's origin to Console › Integration › allowed origins. |
-| `failed · <code>` (`source: "frame"`) | A reason reported by the hosted verifier itself. |
+| `failed · <code>` (`source: "frame"`) | A reason reported by the hosted verifier itself: see [Frame reason codes](#frame-reason-codes). |
+
+## Frame reason codes
+
+The `<code>` in `rejected:<code>` (link status `failed`, `source: frame`). One vocabulary,
+owned by the hosted chat (`busymate-ai-src`, `packages/chat-wire/src/identityLinkReasons.ts`);
+the Console's Account linking timeline explains the same codes. Additive: treat unknown codes
+as opaque. `nonce_mismatch` and `origin_not_allowed` mean the same as the page-side codes above.
+The hosted chat sends `busymate.identity.v1.ack` (`CONTRACT-v1.md`, frame → host) after each
+identified launch: `identified`, or `rejected:<code>`; and `anonymous` once a launch settles with
+no identity.
+
+| Code | Meaning | Fix |
+|---|---|---|
+| `clock_skew` | The token expired, or its `iat` is in the future, by more than a minute. | Sync your signing server's clock (NTP). |
+| `token_expired` | The token expired in flight. | Mint the token right before you return it; do not cache it. |
+| `signature_invalid` | The signature does not verify against your published keys. | Sign with the private key whose public key is in your JWKS. |
+| `unknown_kid` | The token's `kid` is not in your JWKS. | Publish the new key before you sign with it. |
+| `jwks_unavailable` | Your JWKS could not be fetched. | Make the JWKS URL publicly reachable over HTTPS. |
+| `claim_invalid` | A required claim (`aud`, `iss`, `sub`, `jti`, `iat`, `exp`, max age) is missing or wrong. | Match the claims in the identity settings. |
+| `tenant_claim_mismatch` | The workspace claim names another workspace. | Put this workspace's value in the workspace claim. |
+| `nonce_mismatch` | The token's nonce is not the one the chat asked with. | Bind the nonce you were given into the token. |
+| `malformed_token` | Not a parseable JWT, or no issuer. | Return a compact ES256/RS256 JWT. |
+| `provider_not_registered` | No enabled sign-in provider has the token's issuer. | Register and enable the provider, or fix `iss`. |
+| `provider_not_published` | The provider is registered but not published. | Publish the support settings. |
+| `issuer_owned_elsewhere` | Another workspace owns this issuer and workspace claim. | Use your own issuer or workspace claim value. |
+| `verifier_misconfigured` | The provider has no usable algorithm. | Allow ES256 or RS256 on the provider. |
+| `launch_replayed` | This token was already used; tokens are single-use. | Mint a new token for every ask. |
+| `launch_failed` | The verified identity could not become a session. | Retry; if it persists, check the Console's Account linking timeline. |
+| `origin_not_allowed` | This page's origin is not an allowed website of the workspace. | Add the origin to the workspace's allowed websites. |
+| `verifier_error` | Any other verifier refusal. | See the Console's Account linking timeline. |
 
 Never log tokens, nonces or account ids while troubleshooting; the SDK's statuses and events contain none.
