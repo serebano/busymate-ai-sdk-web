@@ -9,6 +9,8 @@ export interface CspOptions {
   readonly mintOrigin?: string;
   /** Where you serve the SDK's script-tag build from, when not `'self'`. */
   readonly scriptOrigin?: string;
+  /** Set when the page calls `registerPageTools()`: the page-tools runtime is a module served by the chat origin. */
+  readonly pageTools?: boolean;
 }
 
 /**
@@ -18,8 +20,9 @@ export interface CspOptions {
  * - `frame-src`: the chat frame.
  * - `connect-src`: the embed preflight (`/api/embed-status`) and, when it is on
  *   another origin, your mint endpoint.
- * - `script-src`: only when you load the script-tag build from somewhere else.
- *   The SDK itself loads no remote script.
+ * - `script-src`: when you load the script-tag build from somewhere else, and
+ *   (`pageTools: true`) the chat origin, which serves the page-tools runtime
+ *   on first `registerPageTools()`. Nothing else is loaded.
  * - `style-src`: the SDK injects one `<style>` element; pass `nonce` to
  *   `createBusymateChat` when your policy uses nonces, otherwise allow `'self'`
  *   plus that nonce or a hash.
@@ -34,7 +37,8 @@ export function cspDirectives(options: CspOptions): Record<string, string[]> {
   const mint = options.mintOrigin ? parseExactOrigin(options.mintOrigin) : null;
   if (mint && mint !== origin) directives["connect-src"]!.push(mint);
   const script = options.scriptOrigin ? parseExactOrigin(options.scriptOrigin) : null;
-  if (script) directives["script-src"] = [script];
+  const scripts = [script, options.pageTools ? origin : null].filter((value): value is string => !!value);
+  if (scripts.length) directives["script-src"] = [...new Set(scripts)];
   return directives;
 }
 

@@ -7,7 +7,7 @@ A visitor signed in to your product is linked to their account in the chat by a 
 One authenticated endpoint, for example `POST /api/bmai/identity`, that:
 
 1. requires your own session (cookie or bearer); signed out answers `401`;
-2. reads `{ nonce, returnTo }` from the body;
+2. reads `{ nonce }` from the body (the SDK also sends `returnTo`; ignore it);
 3. signs an **ES256** JWT: `iss` (your issuer), `aud` (as registered), your workspace claim, `sub` (your stable internal user id, never an email or session id), `nonce` (echoed verbatim), a unique `jti`, `iat`, and `exp` at most 120 s after `iat`;
 4. answers `201 { token, nonce, expiresIn }` with `Cache-Control: no-store`;
 5. publishes the **public** key at `/.well-known/jwks.json` with a `kid`.
@@ -35,19 +35,21 @@ A custom provider is any function `({ nonce, reason }) => { token, nonce } | nul
 
 ## 3. Your auth events
 
+The names are the identity contract's: `getIdentity`, `identityChanged`, `signedOut`, `account`. `logout()`, `setUser(null)`, `switchAccount()` and `refreshIdentity()` are accepted aliases and are not documented further. The full flow, including the actor token your MCP verifies, is on [Sign-in and identity](https://busymate.ai/docs/identity).
+
 | Your product | Call | The chat |
 |---|---|---|
 | Signed in, token rotated | `chat.identityChanged()` | Same conversation, now identified (in place, no reload). |
-| Switched account | `chat.switchAccount()` | Withdraws the previous person (transcript cleared), then links the next. |
-| Signed out | `chat.logout()` | Drops the verified identity, ends the session, clears the transcript. **Never skip this**: without it the next person at this browser sees the previous person's chat. |
-| Session expired | `chat.logout("expired")` | As above, labelled expired. |
-| You already hold a token | `chat.identify({ token, nonce })` / `chat.setUser(...)` | Offered in place (before `mount()`: carried on the frame URL fragment). |
+| Switched account | `chat.identityChanged()` | The same conversation upgrades in place for the new person (`account()` also catches a missed switch). |
+| Signed out | `chat.signedOut()` | Drops the verified identity, ends the session, clears the transcript. **Never skip this**: without it the next person at this browser sees the previous person's chat. |
+| Session expired | `chat.signedOut("expired")` | As above, labelled expired. |
+| You already hold a token | `chat.identify({ token, nonce })` | Offered in place (before `mount()`: carried on the frame URL fragment). |
 
 Route changes need nothing: the chat re-asks on resume, reconnect and expiry.
 
 ## 4. In-chat sign-in
 
-When a guest taps "Sign in" in the chat, it asks your page to send them to your login (the URL configured in the Console). By default the SDK navigates this tab to that URL with `return_to` = this page. Your login returns to `return_to#bmai_token=…&bmai_nonce=…`; on the next `mount()` the SDK removes that fragment from the address bar before anything else can read it and launches the chat identified. To keep the visitor on the page, pass `onSignInRequest(url)`, run your own login (a modal), return `true`, then call `identityChanged()`.
+When a guest taps "Sign in" in the chat, it asks your page to send them to your login (the URL configured in the Console). By default the SDK navigates this tab to that URL with `return_to` = this page. Your login returns to `return_to#bmai_token=…&bmai_nonce=…`; on the next `mount()` the SDK removes that fragment from the address bar before anything else can read it and launches the chat identified. To keep the visitor on the page, register a `sign_in` [page tool](page-tools.md): the chat shows a card (email and code, password, or one button), your page signs the user in and the chat re-asks `getIdentity` in place. Or pass `onSignInRequest(url)`, run your own login (a modal), return `true`, then call `identityChanged()`.
 
 ## 5. Timing
 

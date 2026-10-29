@@ -4,6 +4,7 @@ import { IdentityLink, DEFAULT_IDENTITY_BUDGET_MS } from "./identity.js";
 import { defaultOrigin, parseExactOrigin } from "./origins.js";
 import { chatStyles } from "./styles.js";
 import { SDK_VERSION } from "./version.js";
+import { loadPageTools, type PageToolsRuntime } from "./pagetools.js";
 import { VisitorToken, consumeReturnIdentity } from "./visitor.js";
 import {
   ASSISTANT_SLUG,
@@ -591,6 +592,9 @@ export function createBusymateChat(options: BusymateChatOptions): BusymateChat {
     link.frameReplaced();
   }
 
+  let pageToolsRuntime: Promise<PageToolsRuntime> | null = null;
+  const pageTools = (): Promise<PageToolsRuntime> => (pageToolsRuntime ??= loadPageTools(origin));
+
   // ── public handle ────────────────────────────────────────────────────────
   const chat: BusymateChat = {
     version: SDK_VERSION,
@@ -638,8 +642,14 @@ export function createBusymateChat(options: BusymateChatOptions): BusymateChat {
       return identity === null ? link.logout("signed_out") : chat.identify(identity);
     },
     identityChanged: () => link.changed(),
+    signedOut: (reason?: RevokeReason) => link.logout(reason),
     logout: (reason?: RevokeReason) => link.logout(reason),
     switchAccount: (next?: BusymateIdentity | null) => link.switchAccount(next),
+    refreshIdentity: () => link.changed(),
+    registerPageTools: (tools, toolOptions) =>
+      pageTools().then((runtime) => runtime.registerPageTools(tools, { ...toolOptions, exposedTo: [...new Set([origin, "https://busymate.ai", ...(toolOptions?.exposedTo ?? [])])] })),
+    unregisterPageTools: (names) => pageTools().then((runtime) => runtime.unregisterPageTools(names)),
+    registerDeclarativeForms: (formOptions) => pageTools().then((runtime) => runtime.registerDeclarativeForms({ exposedTo: [origin, "https://busymate.ai"], ...formOptions })),
     get linkStatus(): LinkStatus {
       return link.status;
     },

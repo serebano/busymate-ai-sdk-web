@@ -1,4 +1,4 @@
-# Busymate AI SDK for the Web — 0.1.0
+# Busymate AI SDK for the Web — 0.2.0
 
 Official versioned web SDK for Busymate AI hosted chat: `@busymate/ai-web`. One package for every web integration: the embed (launcher, panel or inline), end-user identity linking with a server-signed token, the `busymate-ai-v1` bridge pinned to [wire contract v1](CONTRACT-v1.md), typed events with link-status reason codes, and CSP and iframe guidance.
 
@@ -14,22 +14,22 @@ busymate.ai keeps serving the hosted chat and updates it every day. This SDK pin
 npm install @busymate/ai-web
 ```
 
-Or install the packed tarball attached to the [0.1.0 release](https://github.com/serebano/busymate-ai-sdk-web/releases/tag/0.1.0):
+Or install the packed tarball attached to the [0.2.0 release](https://github.com/serebano/busymate-ai-sdk-web/releases/tag/0.2.0):
 
 ```sh
-npm install https://github.com/serebano/busymate-ai-sdk-web/releases/download/0.1.0/busymate-ai-web-0.1.0.tgz
+npm install https://github.com/serebano/busymate-ai-sdk-web/releases/download/0.2.0/busymate-ai-web-0.2.0.tgz
 ```
 
 Script tag: download `busymate-ai-web.iife.js` from the same release, serve it from your own origin (or CDN) and pin its SHA-256 with `integrity` (the hash is in the release notes):
 
 ```html
-<script src="/vendor/busymate-ai-web-0.1.0.iife.js" integrity="sha256-…" crossorigin="anonymous"></script>
+<script src="/vendor/busymate-ai-web-0.2.0.iife.js" integrity="sha256-…" crossorigin="anonymous"></script>
 ```
 
 Or pin the git tag and build it (`dist/` is not committed):
 
 ```sh
-git clone --branch 0.1.0 --depth 1 https://github.com/serebano/busymate-ai-sdk-web.git vendor/busymate-ai-sdk-web
+git clone --branch 0.2.0 --depth 1 https://github.com/serebano/busymate-ai-sdk-web.git vendor/busymate-ai-sdk-web
 (cd vendor/busymate-ai-sdk-web && npm ci && npm run build)
 npm install ./vendor/busymate-ai-sdk-web
 ```
@@ -50,21 +50,23 @@ chat.onLinkStatus((s) => console.debug("busymate link", s.state, s.reason));
 chat.on("ready", ({ visitorKind }) => console.debug("chat ready as", visitorKind));
 chat.mount();
 
-// Wire YOUR auth events, not your router:
-auth.onSignIn(() => chat.identityChanged());   // sign-in, token rotation
-auth.onSwitch(() => chat.switchAccount());     // another account
-auth.onSignOut(() => chat.logout());           // never skip this one
+// Wire YOUR auth events, not your router. Three calls, the same names as the script tag:
+auth.onSignIn(() => chat.identityChanged());   // sign-in, token rotation, account switch
+auth.onSignOut(() => chat.signedOut());        // never skip this one
+// getIdentity (above) answers the chat; add `account: () => auth.userId ?? null` to catch a missed switch.
 ```
 
 Script tag:
 
 ```html
-<script src="/vendor/busymate-ai-web-0.1.0.iife.js"></script>
+<script src="/vendor/busymate-ai-web-0.2.0.iife.js"></script>
 <script>
   const chat = BusymateAIWeb.createBusymateChat({ assistant: "acme" });
   chat.mount();
 </script>
 ```
+
+This SDK is the one web path. The `<script src=".../embed/v1.js">` snippet speaks the same names (`getIdentity`, `identityChanged()`, `signedOut()`, `account`); the older spellings (`logout()`, `setUser(null)`, `switchAccount()`, `identify()`, `refreshIdentity()`) still work as aliases, generated from the [identity contract](https://busymate.ai/docs/identity), but are not the documented way. [Sign-in and identity](https://busymate.ai/docs/identity) is the single customer page for the whole flow.
 
 1. Read [identity linking](docs/identity.md): your backend signs a one-time ES256 token; never put a key in the page.
 2. Configure the [complete reference](docs/configuration.md) and [events](docs/events.md).
@@ -91,4 +93,4 @@ npm run build && npm run check:dist && npm run typecheck && npm run lint && npm 
 
 CI (`sdk-check`) runs that on Ubuntu, macOS and Windows (the unit tests drive the pinned wire against a stand-in frame), packs the tarball, installs it into the React example and builds it, and checks that the ESM, CommonJS and script-tag builds load without a DOM and export the same API. The release notes record the live check against the hosted chat. CI does not certify your backend's token signing or your workspace's allowed origins.
 
-Distribution 0.1.0 speaks wire contract v1 (bridge `busymate-ai-v1`, identity `busymate.identity/v1`). The version is 0.x, not 1.0.0 like the native SDKs, because the link-status reason vocabulary reported by the hosted chat (busymate-ai-src#2069) is not settled yet; the wire itself is stable, and 1.0.0 follows once those codes land. The [release manifest](release-manifest.json) pins the contract and wire source hashes. This repository is canonical for web SDK releases; [busymate.ai documentation](https://busymate.ai/docs/guides/web-sdk) owns the human integration guide. See the [changelog](CHANGELOG.md) and [wire contract](CONTRACT-v1.md).
+Distribution 0.2.0 speaks wire contract v1 (bridge `busymate-ai-v1`, identity `busymate.identity/v1`). The version is 0.x, not 1.0.0 like the native SDKs, because the link-status reason vocabulary reported by the hosted chat (busymate-ai-src#2069) is not settled yet; the wire itself is stable, and 1.0.0 follows once those codes land. The [release manifest](release-manifest.json) pins the contract and wire source hashes. This repository is canonical for web SDK releases; [busymate.ai documentation](https://busymate.ai/docs/guides/web-sdk) owns the human integration guide. See the [changelog](CHANGELOG.md) and [wire contract](CONTRACT-v1.md).

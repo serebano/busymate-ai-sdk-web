@@ -6,6 +6,7 @@ export { mintFromEndpoint, type MintEndpointOptions } from "./mint.js";
 export { IdentityError, isIdentity } from "./identity.js";
 export { cspDirectives, cspHeader, IFRAME_POLICY, type CspOptions } from "./csp.js";
 export { parseExactOrigin, defaultOrigin } from "./origins.js";
+export { WEB_LIFECYCLE_NAMES, WEB_LIFECYCLE_ALIASES, DESKTOP_CHANNEL } from "./lifecycle.gen.js";
 export { SDK_VERSION } from "./version.js";
 export {
   CONTRACT_VERSION,
@@ -39,6 +40,9 @@ export type {
   LinkState,
   LinkStatus,
   OpenSource,
+  PageTool,
+  PageToolsHandle,
+  PageToolsOptions,
   ReadyEvent,
   WireMessageEvent,
 } from "./types.js";

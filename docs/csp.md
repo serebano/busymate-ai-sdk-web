@@ -6,7 +6,7 @@
 - **One `fetch`** to that origin's `/api/embed-status` (the preflight; disable with `preflight: false`).
 - **One `<style>` element**, scoped to the SDK's own elements.
 - **Your** mint endpoint, through your provider.
-- **No remote script.** Everything else is in the package.
+- **No remote script**, unless you call `registerPageTools()`: the first call imports the page-tools runtime from the chat origin (add `pageTools: true` to `cspDirectives`). Everything else is in the package.
 
 ## Directives to add
 

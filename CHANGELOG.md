@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Canonical lifecycle names from the identity contract (`@busymate/identity-contract`): `getIdentity` and `account` options, `identityChanged()`, `signedOut(reason)`. `logout()`, `setUser(null)`, `switchAccount()`, `identify()` and the script tag's `refreshIdentity()` stay as documented-nowhere aliases, marked `@deprecated`. The names are generated into `src/lifecycle.gen.ts` (`scripts/gen-lifecycle.mjs`); exports `WEB_LIFECYCLE_NAMES`, `WEB_LIFECYCLE_ALIASES`, `DESKTOP_CHANNEL`.
+- Page tools: `registerPageTools`, `unregisterPageTools`, `registerDeclarativeForms` on the handle, so the in-chat `sign_in` card works without the script tag. The runtime loads lazily from the assistant origin on first call; `cspDirectives({ pageTools: true })` adds that origin to `script-src`. See `docs/page-tools.md`.
+- Docs aligned to https://busymate.ai/docs/identity (mint body `{ nonce }`). No wire change: `CONTRACT-v1.md`, `contract.json` and `src/wire.ts` are byte-identical to 0.1.x.
+
 ## 0.1.1
 
 - Release through npm trusted publishing (GitHub OIDC) only; `release.yml` no longer reads an `NPM_TOKEN` secret. CI derives the packed tarball name from `package.json`. No SDK code or wire change from 0.1.0.
