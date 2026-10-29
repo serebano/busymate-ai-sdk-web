@@ -10,7 +10,11 @@ busymate.ai keeps serving the hosted chat and updates it every day. This SDK pin
 
 ## Install from the GitHub release
 
-The package is not published to the npm registry. Install the packed tarball attached to the [0.1.0 release](https://github.com/serebano/busymate-ai-sdk-web/releases/tag/0.1.0):
+```sh
+npm install @busymate/ai-web
+```
+
+Or install the packed tarball attached to the [0.1.0 release](https://github.com/serebano/busymate-ai-sdk-web/releases/tag/0.1.0):
 
 ```sh
 npm install https://github.com/serebano/busymate-ai-sdk-web/releases/download/0.1.0/busymate-ai-web-0.1.0.tgz
