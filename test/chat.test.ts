@@ -30,7 +30,7 @@ describe("options", () => {
   it("defaults the origin to https://<assistant>.busymate.ai and reports versions", () => {
     chat = createBusymateChat({ assistant: "acme" });
     expect(chat.origin).toBe(ORIGIN);
-    expect(chat.version).toBe("0.1.0");
+    expect(chat.version).toBe("0.1.1");
     expect(chat.contractVersion).toBe(1);
     expect(chat.mode).toBe("launcher");
   });

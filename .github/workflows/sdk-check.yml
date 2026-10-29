@@ -25,6 +25,9 @@ jobs:
           python-version: "3.12"
       - name: Verify pinned contract and release metadata
         run: python scripts/verify-release.py
+      - name: SDK version from package.json
+        shell: bash
+        run: echo "SDK_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
       - name: Install
         run: npm ci
       - name: Build SDK (ESM + CJS + types + script-tag IIFE)
@@ -44,8 +47,8 @@ jobs:
         shell: bash
         run: |
           npm ci
-          npm install --no-save ../../busymate-ai-web-0.1.0.tgz
-          node -e "import('@busymate/ai-web').then((s) => { if (s.SDK_VERSION !== '0.1.0') process.exit(1); console.log('example resolves', s.SDK_VERSION) })"
+          npm install --no-save ../../busymate-ai-web-${{ env.SDK_VERSION }}.tgz
+          node -e "import('@busymate/ai-web').then((s) => { if (s.SDK_VERSION !== process.env.SDK_VERSION) process.exit(1); console.log('example resolves', s.SDK_VERSION) })"
           npx vite build
       - name: Syntax-check the plain example
         run: node --check example-app/plain/app.js && node --check example-app/server.mjs
@@ -53,13 +56,13 @@ jobs:
         name: Stage release files
         run: |
           mkdir release
-          cp busymate-ai-web-0.1.0.tgz release/
-          cp dist/busymate-ai-web.iife.js release/busymate-ai-web-0.1.0.iife.js
+          cp busymate-ai-web-${{ env.SDK_VERSION }}.tgz release/
+          cp dist/busymate-ai-web.iife.js release/busymate-ai-web-${{ env.SDK_VERSION }}.iife.js
           (cd release && sha256sum * > SHA256SUMS && cat SHA256SUMS)
       - if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: busymate-ai-web-0.1.0
+          name: busymate-ai-web-${{ env.SDK_VERSION }}
           path: release/
 
   sdk-check:
