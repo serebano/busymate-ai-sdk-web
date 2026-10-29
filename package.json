@@ -1,6 +1,6 @@
 {
   "name": "@busymate/ai-web",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official versioned Busymate AI SDK for the web: embed, end-user identity linking, the busymate-ai-v1 bridge and typed events",
   "license": "UNLICENSED",
   "repository": {

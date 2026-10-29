@@ -1,7 +1,7 @@
 name: Release to npm
 # Publishes @busymate/ai-web to npm with provenance from a version tag.
 # Run it from Actions (input: tag, e.g. 0.1.0) or push a new tag. The tag must equal package.json version.
-# Auth: npm trusted publishing (OIDC) when configured on npmjs.com; otherwise the NPM_TOKEN secret (first publish).
+# Auth: npm trusted publishing (GitHub OIDC) only, configured on npmjs.com. No npm token.
 on:
   workflow_dispatch:
     inputs:
@@ -35,10 +35,9 @@ jobs:
       - run: npm run check:dist
       - run: npm test
       - name: Publish to npm with provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # With a trusted publisher configured, an empty token makes npm fall back to OIDC.
-          [ -n "$NODE_AUTH_TOKEN" ] || unset NODE_AUTH_TOKEN
+          # Trusted publishing: npm exchanges the job's OIDC token (id-token: write); setup-node's placeholder token must not be used.
+          unset NODE_AUTH_TOKEN
+          npm install -g npm@^11.5.1 --no-audit --no-fund
           V=$(node -p "require('./package.json').version")
           if npm view "@busymate/ai-web@$V" version >/dev/null 2>&1; then echo "already on npm"; else npm publish --provenance --access public; fi

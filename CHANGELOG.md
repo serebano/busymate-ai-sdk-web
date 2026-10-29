@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Release through npm trusted publishing (GitHub OIDC) only; `release.yml` no longer reads an `NPM_TOKEN` secret. CI derives the packed tarball name from `package.json`. No SDK code or wire change from 0.1.0.
+
 ## 0.1.0
 
 First independent web distribution, `@busymate/ai-web`, speaking wire contract v1 (bridge `busymate-ai-v1`, channel `embed`, identity `busymate.identity/v1`; see `CONTRACT-v1.md` and `contract.json`).
