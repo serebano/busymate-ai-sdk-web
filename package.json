@@ -7,7 +7,7 @@
     "type": "git",
     "url": "git+https://github.com/serebano/busymate-ai-sdk-web.git"
   },
-  "homepage": "https://github.com/serebano/busymate-ai-sdk-web#readme",
+  "homepage": "https://busymate.ai/docs/guides/web-sdk",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -58,5 +58,8 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.70.1",
     "vitest": "5.0.1"
+  },
+  "bugs": {
+    "url": "https://github.com/serebano/busymate-ai-sdk-web/issues"
   }
 }
