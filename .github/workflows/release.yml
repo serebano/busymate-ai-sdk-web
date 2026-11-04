@@ -1,7 +1,9 @@
 name: Release to npm
 # Publishes @busymate/ai-web to npm with provenance from a version tag.
 # Run it from Actions (input: tag, e.g. 0.1.0) or push a new tag. The tag must equal package.json version.
-# Auth: npm trusted publishing (GitHub OIDC) only, configured on npmjs.com. No npm token.
+# Runs on our k3s runner ci-sdk-web, never GitHub-hosted (owner order 2026-11-04). npm trusted publishing and
+# --provenance only work on GitHub-hosted runners (npm refuses RUNNER_ENVIRONMENT=self-hosted), so the publish uses
+# the repository secret NPM_TOKEN (a granular automation token for @busymate/ai-web); without it the job fails.
 on:
   workflow_dispatch:
     inputs:
@@ -12,10 +14,9 @@ on:
     tags: ["[0-9]*"]
 permissions:
   contents: read
-  id-token: write
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ci-sdk-web
     env:
       TAG: ${{ inputs.tag || github.ref_name }}
     steps:
@@ -34,10 +35,13 @@ jobs:
       - run: npm run build
       - run: npm run check:dist
       - run: npm test
-      - name: Publish to npm with provenance
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # Trusted publishing: npm exchanges the job's OIDC token (id-token: write); setup-node's placeholder token must not be used.
-          unset NODE_AUTH_TOKEN
-          npm install -g npm@^11.5.1 --no-audit --no-fund
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN is not set. Trusted publishing needs a GitHub-hosted runner, which this repo no longer uses; add a granular npm automation token as the NPM_TOKEN secret."
+            exit 1
+          fi
           V=$(node -p "require('./package.json').version")
-          if npm view "@busymate/ai-web@$V" version >/dev/null 2>&1; then echo "already on npm"; else npm publish --provenance --access public; fi
+          if npm view "@busymate/ai-web@$V" version >/dev/null 2>&1; then echo "already on npm"; else npm publish --access public; fi

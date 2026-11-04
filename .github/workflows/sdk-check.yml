@@ -6,25 +6,27 @@ on:
   pull_request:
 permissions:
   contents: read
+# Our runners only, never GitHub-hosted (owner order 2026-11-04): Linux = ephemeral k3s scale set ci-sdk-web,
+# macOS = the Mac runner bm-mac-busymate-ai-sdk-web. There is no Windows runner; the SDK is plain JS with no
+# OS-specific code, so the former windows-latest leg is dropped (Linux and macOS still build, lint, test, pack).
 jobs:
   build:
     name: build (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+        include:
+          - { os: linux, runner: '"ci-sdk-web"' }
+          - { os: macos, runner: '["self-hosted","macOS","bm-mac"]' }
+    runs-on: ${{ fromJSON(matrix.runner) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
       - name: Verify pinned contract and release metadata
-        run: python scripts/verify-release.py
+        run: python3 scripts/verify-release.py
       - name: SDK version from package.json
         shell: bash
         run: echo "SDK_VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
@@ -52,14 +54,14 @@ jobs:
           npx vite build
       - name: Syntax-check the plain example
         run: node --check example-app/plain/app.js && node --check example-app/server.mjs
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'linux'
         name: Stage release files
         run: |
           mkdir release
           cp busymate-ai-web-${{ env.SDK_VERSION }}.tgz release/
           cp dist/busymate-ai-web.iife.js release/busymate-ai-web-${{ env.SDK_VERSION }}.iife.js
           (cd release && sha256sum * > SHA256SUMS && cat SHA256SUMS)
-      - if: matrix.os == 'ubuntu-latest'
+      - if: matrix.os == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: busymate-ai-web-${{ env.SDK_VERSION }}
@@ -68,7 +70,10 @@ jobs:
   sdk-check:
     if: always()
     needs: [build]
-    runs-on: ubuntu-latest
+    runs-on: ci-sdk-web
     steps:
+      - uses: actions/checkout@v4
+      - name: No GitHub-hosted runners (runs-on lint)
+        run: python3 .github/runs-on-lint.py
       - name: All SDK checks passed
         run: test "${{ needs.build.result }}" = success
