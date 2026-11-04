@@ -19,6 +19,8 @@ jobs:
           - { os: linux, runner: '"ci-sdk-web"' }
           - { os: macos, runner: '["self-hosted","macOS","bm-mac"]' }
     runs-on: ${{ fromJSON(matrix.runner) }}
+    # Mac jobs: the timeout includes the wait for the shared Mac's one-job lock.
+    timeout-minutes: ${{ contains(toJSON(matrix), 'bm-mac') && 150 || 30 }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,9 +70,10 @@ jobs:
           path: release/
 
   sdk-check:
-    if: always()
+    if: ${{ always() && !cancelled() }}  # a cancelled run must not turn the gate red
     needs: [build]
     runs-on: ci-sdk-web
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: No GitHub-hosted runners (runs-on lint)
