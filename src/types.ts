@@ -20,6 +20,33 @@ export interface IdentityRequest {
  */
 export type IdentityProvider = (request: IdentityRequest) => BusymateIdentity | null | Promise<BusymateIdentity | null>;
 
+/** A tool your page offers the assistant. `execute` runs in YOUR page, so credentials never reach the assistant. */
+export interface PageTool {
+  /** Lowercase letters, digits, `_` or `-`. The in-chat sign-in tool is named `sign_in`. */
+  readonly name: string;
+  readonly description: string;
+  /** JSON Schema of the arguments. */
+  readonly inputSchema: Readonly<Record<string, unknown>>;
+  readonly annotations?: { readonly readOnlyHint?: boolean } & Readonly<Record<string, unknown>>;
+  execute(input: Record<string, unknown>): unknown | Promise<unknown>;
+}
+
+export interface PageToolsOptions {
+  /** Extra exact origins allowed to run these tools. The assistant's own origin and https://busymate.ai are always included. */
+  readonly exposedTo?: readonly string[];
+  /** Abort to unregister every tool this call registered. */
+  readonly signal?: AbortSignal;
+}
+
+export interface PageToolsHandle {
+  /** The names now live. */
+  readonly tools: readonly string[];
+  /** Tools of this call that failed validation (the rest are live). */
+  readonly rejected: readonly { readonly name: string; readonly reason: string }[];
+  readonly exposedTo: readonly string[];
+  unregister(): void;
+}
+
 /** Where the chat is drawn. */
 export type ChatMode = "launcher" | "panel" | "inline";
 
@@ -201,14 +228,44 @@ export interface BusymateChat {
   setIdentityProvider(provider: IdentityProvider | null, account?: (() => string | null | undefined) | null): void;
   /** Offer a server-signed identity to the chat now (in place, same conversation). */
   identify(identity: BusymateIdentity): boolean;
-  /** `setUser(identity)` = `identify`; `setUser(null)` = `logout()`. */
+  /**
+   * Legacy alias. `setUser(identity)` = `identify`; `setUser(null)` = `signedOut()`.
+   * @deprecated Call `identityChanged()` / `signedOut()`.
+   */
   setUser(identity: BusymateIdentity | null): boolean;
   /** Your customer signed in, rotated a token or changed account: re-ask the provider and upgrade in place. */
   identityChanged(): Promise<boolean>;
-  /** Your customer signed out: the chat drops the verified identity and the previous transcript. */
+  /**
+   * Your customer signed out: the chat drops the verified identity and the previous transcript.
+   * Call it on every logout; without it the next person at this browser sees the previous person's chat.
+   */
+  signedOut(reason?: RevokeReason): boolean;
+  /**
+   * Legacy alias of `signedOut()`.
+   * @deprecated Call `signedOut()`.
+   */
   logout(reason?: RevokeReason): boolean;
-  /** Withdraw the current person's chat, then link the next one (from `next` or the provider). */
+  /**
+   * Legacy alias: withdraw the current person's chat, then link the next one (from `next` or the provider).
+   * @deprecated Call `identityChanged()` after the switch: the same conversation upgrades in place.
+   */
   switchAccount(next?: BusymateIdentity | null): Promise<boolean>;
+  /**
+   * Legacy alias of `identityChanged()` (the script tag's old name).
+   * @deprecated Call `identityChanged()`.
+   */
+  refreshIdentity(): Promise<boolean>;
+
+  /**
+   * Page tools: let the assistant act on your page (the in-chat `sign_in` card, forms, lookups).
+   * The runtime loads once, on first call, from the assistant origin (needs `script-src` for it:
+   * `cspDirectives({ pageTools: true })`). Tools are exposed to this assistant's origin only.
+   */
+  registerPageTools(tools: readonly PageTool[], options?: PageToolsOptions): Promise<PageToolsHandle>;
+  /** Remove tools by name (or all this page registered when omitted). */
+  unregisterPageTools(names?: readonly string[]): Promise<void>;
+  /** Turn `<form toolname="...">` markup on this page into page tools. */
+  registerDeclarativeForms(options?: Readonly<Record<string, unknown>>): Promise<unknown>;
   /** The latest link status. */
   readonly linkStatus: LinkStatus;
   /** Subscribe to link status; called immediately with the current value. Returns unsubscribe. */
