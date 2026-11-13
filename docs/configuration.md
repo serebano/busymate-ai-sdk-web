@@ -56,4 +56,4 @@ Floating modes publish what the hosted loader publishes, so CSS and scripts writ
 
 ## Not in this version
 
-The floating picture-in-picture window (the chat's "pop out" control reports it unavailable), page tools (`registerPageTools`), `data-layout="push"`, the Console launcher look and page-language reporting stay with the snippet for now.
+The floating picture-in-picture window (the chat's "pop out" control reports it unavailable), `data-layout="push"`, the Console launcher look and page-language reporting stay with the snippet for now. Page tools are in ([page tools](page-tools.md)).
