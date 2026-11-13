@@ -16,6 +16,9 @@
     const saved = JSON.parse(sessionStorage.getItem(KEY) || "{}");
     for (const [id, value] of Object.entries(saved)) if ($(id)) $(id).value = value;
   } catch (_) { /* ignored */ }
+  // Query parameters win (a shareable, preconfigured link for phones): ?assistant=&origin=&mode=&locale=&theme=&mint=
+  const query = new URLSearchParams(location.search);
+  for (const id of ["assistant", "origin", "mode", "locale", "theme", "mint"]) if (query.has(id) && $(id)) $(id).value = query.get(id);
 
   let chat = null;
   window.__busymateExample = { events: [] }; // read by the live smoke check

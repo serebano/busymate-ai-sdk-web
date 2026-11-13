@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The plain example reads its settings from the URL (`?assistant=&origin=&mode=&locale=&theme=&mint=`), so a farm phone can open a preconfigured link. The examples are also published at https://serebano.github.io/busymate-ai-sdk-web/ (built from `main`).
+- Farm-phone check, 2026-10-15, on the Busymate AI test workspace `demos`: iOS Safari (iPhone, iOS 26.5) passes launcher open/close, keyboard with the composer visible, `ask()` (plain and React) and link status; one cosmetic gap above the keyboard. Android Chrome (Pixel 4a): the page and launcher load; the interactive checks are pending a free farm Pixel with Chrome. Results and screenshots: `example-app/farm-checks/2026-10-15.md`.
 - Docs: `docs/identity.md` lists the hosted chat's frame reason codes (`rejected:<code>` in `busymate.identity.v1.ack`), now that the hosted chat sends the ack (busymate-ai-src#2069). No wire or code change.
 - Release notes are kept in `docs/releases/<version>.md` and mirrored on the GitHub release. The 0.1.0 notes are corrected: a live check run before the test-workspace rule, against another product's public guest assistant, is withdrawn and no longer cited as evidence.
 
