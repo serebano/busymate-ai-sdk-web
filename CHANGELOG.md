@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Release notes are kept in `docs/releases/<version>.md` and mirrored on the GitHub release. The 0.1.0 notes are corrected: a live check run before the test-workspace rule, against another product's public guest assistant, is withdrawn and no longer cited as evidence.
+
 ## 0.2.0
 
 - Canonical lifecycle names from the identity contract (`@busymate/identity-contract`): `getIdentity` and `account` options, `identityChanged()`, `signedOut(reason)`. `logout()`, `setUser(null)`, `switchAccount()`, `identify()` and the script tag's `refreshIdentity()` stay as documented-nowhere aliases, marked `@deprecated`. The names are generated into `src/lifecycle.gen.ts` (`scripts/gen-lifecycle.mjs`); exports `WEB_LIFECYCLE_NAMES`, `WEB_LIFECYCLE_ALIASES`, `DESKTOP_CHANNEL`.
