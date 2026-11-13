@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Docs: `docs/identity.md` lists the hosted chat's frame reason codes (`rejected:<code>` in `busymate.identity.v1.ack`), now that the hosted chat sends the ack (busymate-ai-src#2069). No wire or code change.
 - Release notes are kept in `docs/releases/<version>.md` and mirrored on the GitHub release. The 0.1.0 notes are corrected: a live check run before the test-workspace rule, against another product's public guest assistant, is withdrawn and no longer cited as evidence.
 
 ## 0.2.0
