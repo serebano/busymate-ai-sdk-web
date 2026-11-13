@@ -4,6 +4,18 @@
 
 - The plain example reads its settings from the URL (`?assistant=&origin=&mode=&locale=&theme=&mint=`), so a farm phone can open a preconfigured link. The examples are also published at https://serebano.github.io/busymate-ai-sdk-web/ (built from `main`).
 - Farm-phone check, 2026-10-15, on the Busymate AI test workspace `demos`: iOS Safari (iPhone, iOS 26.5) passes launcher open/close, keyboard with the composer visible, `ask()` (plain and React) and link status; one cosmetic gap above the keyboard. Android Chrome (Pixel 4a): the page and launcher load; the interactive checks are pending a free farm Pixel with Chrome. Results and screenshots: `example-app/farm-checks/2026-10-15.md`.
+- Docs: `docs/identity.md` lists the hosted chat's frame reason codes (`rejected:<code>` in `busymate.identity.v1.ack`), now that the hosted chat sends the ack (busymate-ai-src#2069). No wire or code change.
+- Release notes are kept in `docs/releases/<version>.md` and mirrored on the GitHub release. The 0.1.0 notes are corrected: a live check run before the test-workspace rule, against another product's public guest assistant, is withdrawn and no longer cited as evidence.
+
+## 0.2.0
+
+- Canonical lifecycle names from the identity contract (`@busymate/identity-contract`): `getIdentity` and `account` options, `identityChanged()`, `signedOut(reason)`. `logout()`, `setUser(null)`, `switchAccount()`, `identify()` and the script tag's `refreshIdentity()` stay as documented-nowhere aliases, marked `@deprecated`. The names are generated into `src/lifecycle.gen.ts` (`scripts/gen-lifecycle.mjs`); exports `WEB_LIFECYCLE_NAMES`, `WEB_LIFECYCLE_ALIASES`, `DESKTOP_CHANNEL`.
+- Page tools: `registerPageTools`, `unregisterPageTools`, `registerDeclarativeForms` on the handle, so the in-chat `sign_in` card works without the script tag. The runtime loads lazily from the assistant origin on first call; `cspDirectives({ pageTools: true })` adds that origin to `script-src`. See `docs/page-tools.md`.
+- Docs aligned to https://busymate.ai/docs/identity (mint body `{ nonce }`). No wire change: `CONTRACT-v1.md`, `contract.json` and `src/wire.ts` are byte-identical to 0.1.x.
+
+## 0.1.1
+
+- Release through npm trusted publishing (GitHub OIDC) only; `release.yml` no longer reads an `NPM_TOKEN` secret. CI derives the packed tarball name from `package.json`. No SDK code or wire change from 0.1.0.
 
 ## 0.1.0
 
