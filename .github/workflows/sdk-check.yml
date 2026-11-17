@@ -6,9 +6,9 @@ on:
   pull_request:
 permissions:
   contents: read
-# Our runners only, never GitHub-hosted (owner order 2026-11-04): Linux = ephemeral k3s scale set ci-sdk-web,
-# macOS = the Mac runner bm-mac-busymate-ai-sdk-web. There is no Windows runner; the SDK is plain JS with no
-# OS-specific code, so the former windows-latest leg is dropped (Linux and macOS still build, lint, test, pack).
+# Our runners only, never GitHub-hosted (owner order 2026-11-04): the ephemeral k3s scale set ci-sdk-web.
+# Only macOS work runs on the Mac (owner 2026-11-17): the SDK is plain JS with no OS-specific code, so the former
+# macOS leg (like the earlier windows-latest leg) ran the same build/lint/test/pack as Linux and is dropped.
 jobs:
   build:
     name: build (${{ matrix.os }})
@@ -17,10 +17,8 @@ jobs:
       matrix:
         include:
           - { os: linux, runner: '"ci-sdk-web"' }
-          - { os: macos, runner: '["self-hosted","macOS","bm-mac"]' }
     runs-on: ${{ fromJSON(matrix.runner) }}
-    # Mac jobs: the timeout includes the wait for the shared Mac's one-job lock.
-    timeout-minutes: ${{ contains(toJSON(matrix), 'bm-mac') && 150 || 30 }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
