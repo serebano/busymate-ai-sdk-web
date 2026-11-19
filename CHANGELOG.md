@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
+
+- **The chat frame lives at `/chat/w/<assistant>`.** `createBusymateChat()` now builds `https://<origin>/chat/w/<assistant>?channel=embed&bridge=busymate-ai-v1&…`. The hosted chat serves both paths with the same frame headers and the same per-workspace `frame-ancestors`; `/support/<assistant>` stays a permanent alias, so pages on 0.1.x/0.2.x and the hosted loader keep working. Visitor keys, query, fragment and wire are unchanged (`CONTRACT-v1.md` and `contract.json` updated for the path only; `src/wire.ts` carries the new prefix). The hosted-chat side: serebano/busymate-ai-src#6147.
 
 - The plain example reads its settings from the URL (`?assistant=&origin=&mode=&locale=&theme=&mint=`), so a farm phone can open a preconfigured link. The examples are also published at https://serebano.github.io/busymate-ai-sdk-web/ (built from `main`).
 - Farm-phone check, 2026-10-15, on the Busymate AI test workspace `demos`: iOS Safari (iPhone, iOS 26.5) passes launcher open/close, keyboard with the composer visible, `ask()` (plain and React) and link status; one cosmetic gap above the keyboard. Android Chrome (Pixel 4a): the page and launcher load; the interactive checks are pending a free farm Pixel with Chrome. Results and screenshots: `example-app/farm-checks/2026-10-15.md`.

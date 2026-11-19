@@ -6,7 +6,8 @@
   "identityContract": "busymate.identity/v1",
   "hostClass": "web-configure",
   "frame": {
-    "path": "/support/{assistant}",
+    "path": "/chat/w/{assistant}",
+    "legacyPath": "/support/{assistant} (still served by the hosted chat as a permanent alias; the SDK no longer emits it)",
     "query": {
       "channel": "embed",
       "bridge": "busymate-ai-v1",
