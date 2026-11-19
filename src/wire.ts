@@ -76,7 +76,7 @@ export const UNAVAILABLE_REASONS = Object.freeze(["not_signed_in", "mint_failed"
 export type UnavailableReason = (typeof UNAVAILABLE_REASONS)[number];
 
 /** The frame URL's launch parameters, in the order the hosted loader sets them. */
-export const FRAME_PATH_PREFIX = "/support/" as const;
+export const FRAME_PATH_PREFIX = "/chat/w/" as const;
 
 /** The frame's iframe attributes. Leave them as they are: the hosted chat expects exactly these. */
 export const IFRAME_SANDBOX = "allow-scripts allow-forms allow-same-origin" as const;

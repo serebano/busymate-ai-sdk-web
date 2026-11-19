@@ -30,7 +30,7 @@ describe("options", () => {
   it("defaults the origin to https://<assistant>.busymate.ai and reports versions", () => {
     chat = createBusymateChat({ assistant: "acme" });
     expect(chat.origin).toBe(ORIGIN);
-    expect(chat.version).toBe("0.2.0");
+    expect(chat.version).toBe("0.3.0");
     expect(chat.contractVersion).toBe(1);
     expect(chat.mode).toBe("launcher");
   });
@@ -44,7 +44,7 @@ describe("mount", () => {
     const iframe = document.querySelector("iframe")!;
     const src = new URL(iframe.src);
     expect(src.origin).toBe(ORIGIN);
-    expect(src.pathname).toBe("/support/acme");
+    expect(src.pathname).toBe("/chat/w/acme");
     expect(src.searchParams.get("channel")).toBe("embed");
     expect(src.searchParams.get("bridge")).toBe("busymate-ai-v1");
     expect(src.searchParams.get("host")).toBe("https://shop.example.com");

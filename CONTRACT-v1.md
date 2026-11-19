@@ -28,7 +28,7 @@ check the code against it, and the release manifest pins both files' SHA-256.
 The SDK creates one `<iframe>`:
 
 ```
-https://<origin>/support/<assistant>?channel=embed&bridge=busymate-ai-v1&host=<page origin>&page=<page path>[&locale=<tag>][&instance=<random>]#bmai_visitor=<token>[&bmai_token=<jwt>&bmai_nonce=<nonce>]
+https://<origin>/chat/w/<assistant>?channel=embed&bridge=busymate-ai-v1&host=<page origin>&page=<page path>[&locale=<tag>][&instance=<random>]#bmai_visitor=<token>[&bmai_token=<jwt>&bmai_nonce=<nonce>]
 ```
 
 | Part | Meaning |
