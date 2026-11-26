@@ -1,4 +1,4 @@
-# Busymate AI SDK for the Web — 0.3.0
+# Busymate AI SDK for the Web — 0.3.1
 
 Official versioned web SDK for Busymate AI hosted chat: `@busymate/ai-web`. One package for every web integration: the embed (launcher, panel or inline), end-user identity linking with a server-signed token, the `busymate-ai-v1` bridge pinned to [wire contract v1](CONTRACT-v1.md), typed events with link-status reason codes, and CSP and iframe guidance.
 
@@ -14,22 +14,22 @@ busymate.ai keeps serving the hosted chat and updates it every day. This SDK pin
 npm install @busymate/ai-web
 ```
 
-Or install the packed tarball attached to the [0.3.0 release](https://github.com/serebano/busymate-ai-sdk-web/releases/tag/0.3.0):
+Or install the packed tarball attached to the [0.3.1 release](https://github.com/serebano/busymate-ai-sdk-web/releases/tag/0.3.1):
 
 ```sh
-npm install https://github.com/serebano/busymate-ai-sdk-web/releases/download/0.3.0/busymate-ai-web-0.3.0.tgz
+npm install https://github.com/serebano/busymate-ai-sdk-web/releases/download/0.3.1/busymate-ai-web-0.3.1.tgz
 ```
 
 Script tag: download `busymate-ai-web.iife.js` from the same release, serve it from your own origin (or CDN) and pin its SHA-256 with `integrity` (the hash is in the release notes):
 
 ```html
-<script src="/vendor/busymate-ai-web-0.3.0.iife.js" integrity="sha256-…" crossorigin="anonymous"></script>
+<script src="/vendor/busymate-ai-web-0.3.1.iife.js" integrity="sha256-…" crossorigin="anonymous"></script>
 ```
 
 Or pin the git tag and build it (`dist/` is not committed):
 
 ```sh
-git clone --branch 0.3.0 --depth 1 https://github.com/serebano/busymate-ai-sdk-web.git vendor/busymate-ai-sdk-web
+git clone --branch 0.3.1 --depth 1 https://github.com/serebano/busymate-ai-sdk-web.git vendor/busymate-ai-sdk-web
 (cd vendor/busymate-ai-sdk-web && npm ci && npm run build)
 npm install ./vendor/busymate-ai-sdk-web
 ```
@@ -59,7 +59,7 @@ auth.onSignOut(() => chat.signedOut());        // never skip this one
 Script tag:
 
 ```html
-<script src="/vendor/busymate-ai-web-0.3.0.iife.js"></script>
+<script src="/vendor/busymate-ai-web-0.3.1.iife.js"></script>
 <script>
   const chat = BusymateAIWeb.createBusymateChat({ assistant: "acme" });
   chat.mount();
@@ -93,4 +93,4 @@ npm run build && npm run check:dist && npm run typecheck && npm run lint && npm 
 
 CI (`sdk-check`) runs that on Linux, on our k3s runners (the unit tests drive the pinned wire against a stand-in frame), packs the tarball, installs it into the React example and builds it, and checks that the ESM, CommonJS and script-tag builds load without a DOM and export the same API. The release notes record the live check against the hosted chat. CI does not certify your backend's token signing or your workspace's allowed origins.
 
-Distribution 0.3.0 speaks wire contract v1 (bridge `busymate-ai-v1`, identity `busymate.identity/v1`). The version is 0.x, not 1.0.0 like the native SDKs, because the link-status reason vocabulary reported by the hosted chat (busymate-ai-src#2069) is not settled yet; the wire itself is stable, and 1.0.0 follows once those codes land. The [release manifest](release-manifest.json) pins the contract and wire source hashes. This repository is canonical for web SDK releases; [busymate.ai documentation](https://busymate.ai/docs/guides/web-sdk?utm_source=github&utm_medium=readme&utm_campaign=busymate-ai-sdk-web) owns the human integration guide. See the [changelog](CHANGELOG.md) and [wire contract](CONTRACT-v1.md).
+Distribution 0.3.1 speaks wire contract v1 (bridge `busymate-ai-v1`, identity `busymate.identity/v1`). The version is 0.x, not 1.0.0 like the native SDKs, because the link-status reason vocabulary reported by the hosted chat (busymate-ai-src#2069) is not settled yet; the wire itself is stable, and 1.0.0 follows once those codes land. The [release manifest](release-manifest.json) pins the contract and wire source hashes. This repository is canonical for web SDK releases; [busymate.ai documentation](https://busymate.ai/docs/guides/web-sdk?utm_source=github&utm_medium=readme&utm_campaign=busymate-ai-sdk-web) owns the human integration guide. See the [changelog](CHANGELOG.md) and [wire contract](CONTRACT-v1.md).

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- **Security: a late identity result can no longer link the wrong person (ECO-01).** The page side of identity linking now keeps an identity generation, bumped by `signedOut()`/`logout()`, `switchAccount()`, an `account()` change, `identify()` and every new provider call. A provider result that settles after any of those is dropped instead of offered to the chat, so a token minted for the previous person never reaches the chat after a logout or an account switch. An ask still waiting on such a result is answered `unavailable: unsupported` (the chat continues with what it holds). No wire change: `CONTRACT-v1.md`, `contract.json` and `src/wire.ts` are byte-identical to 0.3.0.
+
 ## 0.3.0
 
 - **The chat frame lives at `/chat/w/<assistant>`.** `createBusymateChat()` now builds `https://<origin>/chat/w/<assistant>?channel=embed&bridge=busymate-ai-v1&…`. The hosted chat serves both paths with the same frame headers and the same per-workspace `frame-ancestors`; `/support/<assistant>` stays a permanent alias, so pages on 0.1.x/0.2.x and the hosted loader keep working. Visitor keys, query, fragment and wire are unchanged (`CONTRACT-v1.md` and `contract.json` updated for the path only; `src/wire.ts` carries the new prefix). The hosted-chat side: serebano/busymate-ai-src#6147.

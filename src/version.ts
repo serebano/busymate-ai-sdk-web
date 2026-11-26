@@ -1,2 +1,2 @@
 /** This SDK distribution's version (semver). Independent of the wire contract version. */
-export const SDK_VERSION = "0.3.0";
+export const SDK_VERSION = "0.3.1";

@@ -69,6 +69,12 @@ export class IdentityLink {
   private readonly setTimer: (fn: () => void, ms: number) => unknown;
   private readonly clearTimer: (id: unknown) => void;
   private disposed = false;
+  /**
+   * Bumped by every logout, switch, account change, explicit identify() and new
+   * mint. A provider result minted under an older generation belongs to a
+   * person or a request that is no longer current and is dropped, never offered.
+   */
+  private generation = 0;
 
   constructor(private readonly options: IdentityLinkOptions) {
     this.provider = options.provider;
@@ -156,6 +162,7 @@ export class IdentityLink {
     this.setStatus("linking", "identity_requested", "sdk", `the chat asked (${reason})`);
     let budget = this.options.budgetMs;
     if (typeof deadlineAt === "number") budget = Math.max(0, Math.min(budget, deadlineAt - this.now() - 100));
+    const generation = this.nextGeneration();
     const pending = this.mint(reason);
     let answered = late;
     const timer = late
@@ -169,6 +176,13 @@ export class IdentityLink {
     const outcome = await pending;
     if (timer !== null) this.clearTimer(timer);
     if (this.disposed) return;
+    if (generation !== this.generation) {
+      // Logout, a switch or a newer identity happened while the provider ran: drop
+      // the stale result. An ask still waiting is told to resume what it holds.
+      if (!answered) this.options.reply(this.unavailable("unsupported"));
+      answered = true;
+      return;
+    }
     this.answer(answered, outcome);
     answered = true;
   }
@@ -180,6 +194,7 @@ export class IdentityLink {
       return false;
     }
     if (identity.token === this.currentToken) return true;
+    this.nextGeneration();
     this.offer(identity, false);
     return true;
   }
@@ -196,8 +211,9 @@ export class IdentityLink {
       this.lastAccount = account;
     }
     this.setStatus("linking", "account_changed", "sdk");
+    const generation = this.nextGeneration();
     const outcome = await this.mint("changed");
-    if (this.disposed) return false;
+    if (this.disposed || generation !== this.generation) return false;
     this.answer(true, outcome);
     return outcome.kind === "identity";
   }
@@ -217,8 +233,9 @@ export class IdentityLink {
     if (next !== undefined) return this.identify(next);
     if (!this.provider) return false;
     this.setStatus("linking", "account_changed", "sdk");
+    const generation = this.nextGeneration();
     const outcome = await this.mint("switch");
-    if (this.disposed) return false;
+    if (this.disposed || generation !== this.generation) return false;
     this.answer(true, outcome);
     return outcome.kind === "identity";
   }
@@ -341,7 +358,14 @@ export class IdentityLink {
     this.setStatus("linking", "identity_offered", "sdk");
   }
 
+  /** Start a new identity generation; anything minted under an older one is stale. */
+  private nextGeneration(): number {
+    this.generation += 1;
+    return this.generation;
+  }
+
   private revoke(reason: RevokeReason): void {
+    this.nextGeneration();
     this.cancelVerify();
     this.options.send({ type: HOST_MESSAGE.identityRevoked, v: 1, reason });
     this.currentToken = null;
