@@ -229,3 +229,82 @@ describe("identity from your page", () => {
     expect(frame.sent("busymate.identity.v1.unavailable").at(-1)).toMatchObject({ reason: "not_signed_in" });
   });
 });
+
+describe("a late provider result never outlives a logout or a switch (ECO-01)", () => {
+  function deferredProvider() {
+    const pending: Array<{ nonce: string; resolve: (v: { token: string; nonce: string } | null) => void }> = [];
+    const getIdentity = vi.fn(
+      ({ nonce }: IdentityRequest) =>
+        new Promise<{ token: string; nonce: string } | null>((resolve) => {
+          pending.push({ nonce, resolve });
+        }),
+    );
+    return { getIdentity, pending };
+  }
+
+  it("logout during an ask's fetch: the late identity is dropped", async () => {
+    const { getIdentity, pending } = deferredProvider();
+    chat = createBusymateChat({ assistant: "acme", getIdentity });
+    chat.mount();
+    const frame = fakeFrame();
+    frame.say({ ...ask, deadlineAt: Date.now() + 2_000 });
+    await vi.waitFor(() => expect(pending).toHaveLength(1));
+    chat.logout();
+    pending[0]!.resolve({ token: "user-a-jwt", nonce: pending[0]!.nonce });
+    await flush();
+    await vi.waitFor(() => expect(frame.sent("busymate.identity.v1.unavailable")).toHaveLength(1));
+    expect(frame.sent("busymate.ai.v1.identity")).toHaveLength(0);
+    expect(frame.sent("busymate.identity.v1.unavailable")[0]).toMatchObject({ reason: "unsupported" });
+    expect(chat.linkStatus).toMatchObject({ state: "unlinked", reason: "signed_out" });
+  });
+
+  it("logout during identityChanged(): the late identity is dropped", async () => {
+    const { getIdentity, pending } = deferredProvider();
+    chat = createBusymateChat({ assistant: "acme", getIdentity });
+    chat.mount();
+    const frame = fakeFrame();
+    frame.say({ type: "busymate.ai.v1.ready", visitorKind: "anonymous" });
+    const result = chat.identityChanged();
+    await vi.waitFor(() => expect(pending).toHaveLength(1));
+    chat.logout();
+    pending[0]!.resolve({ token: "user-a-jwt", nonce: pending[0]!.nonce });
+    await expect(result).resolves.toBe(false);
+    await flush();
+    expect(frame.sent("busymate.ai.v1.identity")).toHaveLength(0);
+    expect(chat.linkStatus).toMatchObject({ state: "unlinked", reason: "signed_out" });
+  });
+
+  it("switch during a fetch: only the new person's identity reaches the chat", async () => {
+    const { getIdentity, pending } = deferredProvider();
+    chat = createBusymateChat({ assistant: "acme", getIdentity });
+    chat.mount();
+    const frame = fakeFrame();
+    frame.say({ type: "busymate.ai.v1.ready", visitorKind: "identified" });
+    const first = chat.identityChanged();
+    await vi.waitFor(() => expect(pending).toHaveLength(1));
+    const second = chat.switchAccount();
+    await vi.waitFor(() => expect(pending).toHaveLength(2));
+    // The new person's token lands first, then the old one arrives late.
+    pending[1]!.resolve({ token: "user-b-jwt", nonce: pending[1]!.nonce });
+    await expect(second).resolves.toBe(true);
+    pending[0]!.resolve({ token: "user-a-jwt", nonce: pending[0]!.nonce });
+    await expect(first).resolves.toBe(false);
+    await flush();
+    expect(frame.sent("busymate.ai.v1.identity").map((m) => m.token)).toEqual(["user-b-jwt"]);
+  });
+
+  it("switchAccount(next) during an ask's fetch: the old person's late identity is dropped", async () => {
+    const { getIdentity, pending } = deferredProvider();
+    chat = createBusymateChat({ assistant: "acme", getIdentity });
+    chat.mount();
+    const frame = fakeFrame();
+    frame.say({ type: "busymate.ai.v1.ready", visitorKind: "identified" });
+    frame.say({ ...ask, reason: "resume" });
+    await vi.waitFor(() => expect(pending).toHaveLength(1));
+    await expect(chat.switchAccount({ token: "user-b-jwt", nonce: "n-b" })).resolves.toBe(true);
+    pending[0]!.resolve({ token: "user-a-jwt", nonce: pending[0]!.nonce });
+    await flush();
+    await flush();
+    expect(frame.sent("busymate.ai.v1.identity").map((m) => m.token)).toEqual(["user-b-jwt"]);
+  });
+});
