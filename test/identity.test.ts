@@ -293,6 +293,25 @@ describe("a late provider result never outlives a logout or a switch (ECO-01)", 
     expect(frame.sent("busymate.ai.v1.identity").map((m) => m.token)).toEqual(["user-b-jwt"]);
   });
 
+  it("setProvider(B) or setProvider(null) during provider A's fetch: A's late identity is dropped", async () => {
+    for (const next of ["B", null] as const) {
+      const { getIdentity, pending } = deferredProvider();
+      const b = vi.fn(async ({ nonce }: IdentityRequest) => ({ token: "from-b", nonce }));
+      chat = createBusymateChat({ assistant: "acme", getIdentity });
+      chat.mount();
+      const frame = fakeFrame();
+      frame.say({ ...ask, deadlineAt: Date.now() + 2_000 });
+      await vi.waitFor(() => expect(pending).toHaveLength(1));
+      chat.setIdentityProvider(next === "B" ? b : null);
+      pending[0]!.resolve({ token: "from-a", nonce: pending[0]!.nonce });
+      await flush();
+      await vi.waitFor(() => expect(frame.sent("busymate.identity.v1.unavailable").length).toBeGreaterThan(0));
+      expect(frame.sent("busymate.ai.v1.identity").map((m) => m.token)).not.toContain("from-a");
+      cleanup(chat);
+      chat = null;
+    }
+  });
+
   it("switchAccount(next) during an ask's fetch: the old person's late identity is dropped", async () => {
     const { getIdentity, pending } = deferredProvider();
     chat = createBusymateChat({ assistant: "acme", getIdentity });

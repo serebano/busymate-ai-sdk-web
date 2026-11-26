@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+- **Security: completes the ECO-01 fix.** `setIdentityProvider()` now starts a new identity generation too, so a result still minting from the replaced provider (or after the provider is set to `null`) is dropped instead of offered to the chat. New test: provider A delayed, `setIdentityProvider(B)` / `null`, A's token never reaches the chat. No wire change.
+
 ## 0.3.1
 
 - **Security: a late identity result can no longer link the wrong person (ECO-01).** The page side of identity linking now keeps an identity generation, bumped by `signedOut()`/`logout()`, `switchAccount()`, an `account()` change, `identify()` and every new provider call. A provider result that settles after any of those is dropped instead of offered to the chat, so a token minted for the previous person never reaches the chat after a logout or an account switch. An ask still waiting on such a result is answered `unavailable: unsupported` (the chat continues with what it holds). No wire change: `CONTRACT-v1.md`, `contract.json` and `src/wire.ts` are byte-identical to 0.3.0.
