@@ -117,6 +117,8 @@ export class IdentityLink {
   }
 
   setProvider(provider: IdentityProvider | null, account?: (() => string | null | undefined) | null): void {
+    // A result still minting from the previous provider is stale once it is replaced.
+    this.nextGeneration();
     this.provider = provider;
     if (account !== undefined) this.account = account;
     if (!provider && this.statusValue.state === "unlinked") this.setStatus("unlinked", "no_provider", "sdk");
