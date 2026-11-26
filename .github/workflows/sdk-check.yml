@@ -20,8 +20,8 @@ jobs:
     runs-on: ${{ fromJSON(matrix.runner) }}
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -62,7 +62,7 @@ jobs:
           cp dist/busymate-ai-web.iife.js release/busymate-ai-web-${{ env.SDK_VERSION }}.iife.js
           (cd release && sha256sum * > SHA256SUMS && cat SHA256SUMS)
       - if: matrix.os == 'linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: busymate-ai-web-${{ env.SDK_VERSION }}
           path: release/
@@ -73,7 +73,7 @@ jobs:
     runs-on: ci-sdk-web
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: No GitHub-hosted runners (runs-on lint)
         run: python3 .github/runs-on-lint.py
       - name: All SDK checks passed
